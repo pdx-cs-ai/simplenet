@@ -2,7 +2,7 @@
 
 import random
 
-a = 0.0001
+a = 0.01
 
 def lxor(x1, x2):
     return x1 ^ x2
@@ -10,26 +10,26 @@ def lxor(x1, x2):
 def land(x1, x2):
     return x1 and x2
 
-bfun = land
+bfun = lxor
 
 def instances(n, f):
     def instance():
         xs = [random.randrange(2) for _ in range(2)]
-        return [2 * f(*xs) - 1, [2 * x - 1 for x in xs]]
+        return [f(*xs), xs]
     return [instance() for _ in range(n)]
 
 def squash(h):
-    return max(-1, h)
+    return max(0, h)
 
 def dsquash(h):
-    if h >= -1:
+    if h >= 0:
         return 1
     return 0
 
 class Perceptron(object):
 
     def __init__(self):
-        self.ws = [2 * random.random() - 1 for _ in range(2)]
+        self.ws = [random.random() for _ in range(2)]
         self.bias = 0
 
     def h(self, xs):
@@ -46,17 +46,8 @@ class Perceptron(object):
         c0 = self.y(xs)
         e = c - c0
         for i in range(2):
-            if xs[i] >= -1:
-                self.ws[i] += a * xs[i] * e
-        if self.bias >= -1:
-            self.bias += a * e
-
-    def backprop(self, e):
-        xxs = []
-        for i in range(2):
-            xe = dsquash(self.ws[i] * e)
-            xxs.append(self.ws[i] + xe)
-        return xxs
+            self.ws[i] += a * xs[i] * e
+        self.bias += a * e
 
 class Net(object):
     def __init__(self):
@@ -78,7 +69,7 @@ class Net(object):
             ys.append(p.y(xs))
         self.l2.train(c, ys)
 
-net = Net()
+net = Perceptron()
 
 train = instances(1000, bfun)
 for _ in range(1000):
