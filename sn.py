@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# https://medium.com/typeme/
+#  lets-code-a-neural-network-from-scratch-part-3-87e23adbe4b6
+
 import random
 
 a = 0.01
@@ -19,17 +22,19 @@ def instances(n, f):
     return [instance() for _ in range(n)]
 
 def squash(h):
-    return max(0, h)
+    if h >= 0:
+        return h
+    return 0.1 * h
 
 def dsquash(h):
     if h >= 0:
         return 1
-    return 0
+    return 0.1
 
 class Perceptron(object):
 
     def __init__(self):
-        self.ws = [random.random() for _ in range(2)]
+        self.ws = [0.1 + 0.9 * random.random() for _ in range(2)]
         self.bias = 0
 
     def h(self, xs):
@@ -40,7 +45,9 @@ class Perceptron(object):
         return t
 
     def y(self, xs):
-        return squash(self.h(xs))
+        h = self.h(xs)
+        self.yy = squash(h)
+        return self.yy
 
     def train(self, c, xs):
         c0 = self.y(xs)
@@ -48,6 +55,22 @@ class Perceptron(object):
         for i in range(2):
             self.ws[i] += a * xs[i] * e
         self.bias += a * e
+
+    def backprop(self, xs=None, preds=None):
+        delta = a * self.ee * dsquash(self.yy)
+        if preds != None:
+            for i in range(2):
+                preds[i].ee = 0
+        for i in range(2):
+            if preds == None:
+                self.ws[i] += xs[i] * delta
+            else:
+                preds[i].ee += self.ws[i] * self.ee
+                self.ws[i] += preds[i].yy * delta
+            self.bias += delta
+
+    def print_ws(self):
+        print(self.ws, self.bias)
 
 class Net(object):
     def __init__(self):
@@ -60,22 +83,28 @@ class Net(object):
         
     def train(self, c, xs):
         y = self.y(xs)
-        e = c - y
-        xxs = self.l2.backprop(a * e)
-        ys = []
-        for i in range(2):
-            p = self.l1[i]
-            p.train(xxs[i], xs)
-            ys.append(p.y(xs))
-        self.l2.train(c, ys)
+        self.l2.ee = c - y
+        self.l2.backprop(preds=self.l1)
+        for p in self.l1:
+            p.backprop(xs=xs)
 
-net = Perceptron()
+    def print_ws(self):
+        for p in self.l1:
+            p.print_ws()
+        self.l2.print_ws()
+
+net = Net()
 
 train = instances(1000, bfun)
 for _ in range(1000):
     for c, xs in train:
         net.train(c, xs)
 
-clas = instances(10, bfun)
+net.print_ws()
+print()
+
+ttab = [[0, 0], [0, 1], [1, 0], [1, 1]]
+clas = [(bfun(*xs), xs) for xs in ttab]
 for c, xs in clas:
-    print(xs, c, net.y(xs))
+    y = net.y(xs)
+    print(xs, c, int(y > 0.5), y)
