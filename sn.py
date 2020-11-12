@@ -3,7 +3,7 @@
 # https://medium.com/typeme/
 #  lets-code-a-neural-network-from-scratch-part-3-87e23adbe4b6
 
-import random
+import random, sys
 
 # Learning rate.
 a = 0.01
@@ -16,8 +16,18 @@ def lxor(x1, x2):
 def land(x1, x2):
     return x1 and x2
 
+# Boolean or.
+def lor(x1, x2):
+    return x1 or x2
+
+bfuns = {
+    "xor": lxor,
+    "and": land,
+    "or": lor,
+}
+
 # Function to learn.
-bfun = lxor
+bfun = bfuns[sys.argv[1]]
 
 # Generate n instances of the function f.
 def instances(n, f):
@@ -121,8 +131,11 @@ class Net(object):
         self.l2.print_ws()
 
 # Learner to use for experiments.
-# net = Perceptron()
-net = Net()
+nets = {
+    "perceptron": Perceptron,
+    "net": Net,
+}
+net = nets[sys.argv[2]]()
 
 # Train the net on 1000 random instances
 # of the target function.

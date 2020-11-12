@@ -6,3 +6,9 @@ function from random instances using either a single
 perceptron or a tiny neural net.
 
 Please see the code and comments for the details of operation.
+
+## Usage
+
+Say `python3 sn.py`&nbsp;*fn*&nbsp;*learner* where *fn* is
+one of `and`, `or`, `xor` and *learner* is one of
+`perceptron`, `net`.
