@@ -29,11 +29,19 @@ bfuns = {
 # Function to learn.
 bfun = bfuns[sys.argv[1]]
 
+# Noise in output.
+noise = 0
+if len(sys.argv) > 3:
+    noise = float(sys.argv[3])
+
 # Generate n instances of the function f.
 def instances(n, f):
     def instance():
         xs = [random.randrange(2) for _ in range(2)]
-        return [f(*xs), xs]
+        y = int(f(*xs))
+        if random.random() < noise:
+            y = int(not y)
+        return [y, xs]
     return [instance() for _ in range(n)]
 
 # "Leaky ReLU" activation function. 
