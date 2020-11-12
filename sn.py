@@ -44,18 +44,6 @@ def instances(n, f):
         return [y, xs]
     return [instance() for _ in range(n)]
 
-# "Leaky ReLU" activation function. 
-def squash(h):
-    if h >= 0:
-        return h
-    return 0.1 * h
-
-# Derivative of activation function.
-def dsquash(h):
-    if h >= 0:
-        return 1
-    return 0.1
-
 # Single Perceptron.
 class Perceptron(object):
 
@@ -89,6 +77,23 @@ class Perceptron(object):
             self.ws[i] += a * xs[i] * e
         self.bias += a * e
 
+    # Print weights including bias.
+    def print_ws(self):
+        print(self.ws, self.bias)
+
+# "Leaky ReLU" activation function. 
+def squash(h):
+    if h >= 0:
+        return h
+    return 0.1 * h
+
+# Derivative of activation function.
+def dsquash(h):
+    if h >= 0:
+        return 1
+    return 0.1
+
+class Neuron(Perceptron):
     # Train a net perceptron with input xs or predecessor
     # layer preds. In the latter case, assume that y() has
     # been called on each perceptron in preds to establish
@@ -106,18 +111,14 @@ class Perceptron(object):
                 self.ws[i] += preds[i].yy * delta
             self.bias += delta
 
-    # Print weights including bias.
-    def print_ws(self):
-        print(self.ws, self.bias)
-
 # Neural net consisting of a 2-perceptron
 # hidden layer and a one-perceptron output layer.
 class Net(object):
 
     # Set up the net.
     def __init__(self):
-        self.l1 = [Perceptron() for _ in range(2)]
-        self.l2 = Perceptron()
+        self.l1 = [Neuron() for _ in range(2)]
+        self.l2 = Neuron()
     
     # Compute the net output from its inputs.
     def y(self, xs):
